@@ -1,16 +1,9 @@
-import json, requests, os, sys, math
+import json, requests, os, math
 
 # SETTINGS ======
-# application ID - get from http://unsplash.com/api
 APPLICATION_ID = 'ENTER APPLICATION_ID HERE'
-
-# up to a maximum of 30 - per run
 DOWNLOAD_COUNT = 30
-
-# landscape, portrait, or squarish
 PHOTO_ORIENTATION = 'landscape'
-
-# relative to the directory the script is in
 DOWNLOAD_LOCATION = os.path.abspath(
     os.path.join(
         os.path.dirname(__file__),
