@@ -24,6 +24,10 @@ not necessarily in that order, and it doesn't really matter which versions (at t
 
 - `PHOTO_ORIENTATION` - this can be one of `landscape`, `portrait`, or `squarish` - probably doesn't matter unless you plan on using the photos for phone backgrounds (or vertically positioned monitors).
 
+**finally** run
+
+```$ python backgrounds.py```
+
 
 
 
