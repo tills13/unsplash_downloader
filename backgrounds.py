@@ -1,10 +1,15 @@
-import json, requests, os, math
+"""unsplash_downloader"""
+
+import math
+import os
+import sys
+import requests
 
 # SETTINGS ======
 APPLICATION_ID = 'ENTER APPLICATION_ID HERE'
 DOWNLOAD_COUNT = 30
 PHOTO_ORIENTATION = 'landscape'
-DOWNLOAD_LOCATION = os.path.abspath(
+DOWNLOAD_LOCATION = DOWNLOAD_LOCATION = os.path.abspath(
     os.path.join(
         os.path.dirname(__file__),
         'backgrounds'
@@ -20,10 +25,15 @@ BATCHES = int(math.ceil(DOWNLOAD_COUNT / 30.0))
 
 # DOWNLOAD
 def get_backgrounds():
-    for i in range(0, BATCHES):
-        download_count = DOWNLOAD_COUNT - (i * 30)
+    """
+        get_backgrounds: download backgrounds based on parameters at the
+        beginning of this script
+    """
 
-        print("-> batch %d of %d (%d photo(s))" % ((i + 1), BATCHES, download_count))
+    for batch in range(0, BATCHES):
+        download_count = DOWNLOAD_COUNT - (batch * 30)
+
+        print "-> batch %d of %d (%d photo(s))" % ((batch + 1), BATCHES, download_count)
 
         photos_json = requests.get('https://api.unsplash.com/photos/random', params={
             'client_id': APPLICATION_ID,
@@ -35,10 +45,14 @@ def get_backgrounds():
             photo_id = photo['id']
             photo_url = photo['urls']['raw']
 
-            print(" > downloading %s (%d of %d)" % (photo_id, (index + 1), DOWNLOAD_COUNT))
+            print " > downloading %s (%d of %d)" % (
+                photo_id,
+                ((batch * 30) + index + 1),
+                DOWNLOAD_COUNT
+            )
             photo_raw = download_with_progress(photo_url)
             destination_url = os.path.join(DOWNLOAD_LOCATION, '%s.jpeg' % photo_id)
-            print("=> done, saving %s" % destination_url)
+            print "=> done, saving %s" % destination_url
 
             with open(destination_url, 'w+') as destination:
                 destination.write(photo_raw)
@@ -48,7 +62,15 @@ _PROGRESS_BAR_PROGRESS_CHAR = '='
 _PROGRESS_BAR_PAD_CHAR = ' '
 
 def build_progress_bar(progress, total, units=''):
-    _template = "\r=> [%s] %s";
+    """
+        build a progress bar
+
+        :param progress: progress this far
+        :param total: 100% progress
+        :param units:
+    """
+
+    _template = "\r=> [%s] %s"
 
     progress_percent = math.floor((progress * 100) / float(total))
     m_progress = int(progress * _PROGRESS_BAR_LENGTH / total)
@@ -66,16 +88,22 @@ def build_progress_bar(progress, total, units=''):
 
         _progress_bar_extra = '%02d%% ' % progress_percent
 
-    _progress_bar_extra = _progress_bar_extra + "[%02d%s / %02d%s]" % (progress, units, total, units)
+    _progress_bar_extra = _progress_bar_extra + \
+        "[%02d%s / %02d%s]" % (progress, units, total, units)
 
     return _template % (_progress_bar_body, _progress_bar_extra)
 
 def download_with_progress(url):
+    """
+        downloads a file with a progress bar
+
+        :param url: the url of the file
+    """
     response = requests.get(url, stream=True)
     content_length = response.headers.get('content-length')
 
     if content_length is None:
-        print ("!> no content-length header, returning raw content")
+        print "!> no content-length header, returning raw content"
         return response.content
     else:
         bytes_downloaded = 0
@@ -86,7 +114,12 @@ def download_with_progress(url):
             bytes_downloaded = bytes_downloaded + len(data)
             _data = _data + data
 
-            sys.stdout.write(build_progress_bar(bytes_downloaded/1000.0, content_length/1000.0, 'KB'))
+            sys.stdout.write(build_progress_bar(
+                bytes_downloaded/1000.0,
+                content_length/1000.0,
+                'KB'
+            ))
+
             sys.stdout.flush()
 
         sys.stdout.write("\n")
